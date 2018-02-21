@@ -150,5 +150,8 @@ def testuj(rounds, repeats):
         print(i, " ", res/repeats)
 
 
-testuj(int(argv[1]), int(argv[2]))
+try:
+    testuj(int(argv[1]), int(argv[2]))
+except:
+    testuj(5,10000)
 # print(argv)
