@@ -1,32 +1,26 @@
-S = {
-    "ta": 1,
-    "matematyka": 1,
-    "pustki": 1,
-    "nie": 1,
-    "znosi": 1,
-    "tama": 1,
-    "tematy": 1,
-    "kapustki": 1,
-    "nie": 1,
-    "z": 1,
-    "nosi": 1
-}
+S = {}
 
-# TODO końcówka nie działą 
+with open("polish_words.txt") as f:
+    for line in f:
+       key= line.split()
+       S[key] = 1
+
+
 def df(S, row, dd):
     if not len(row):
         return (0, [])
     if row in dd:
         return dd[row]
     else:
-        sum_ = 0
+        suma = -1
         tense = []
-        for i in range(1, len(row)):
+        for i in range(1, len(row)+1):
             if row[:i] in S:
-                (_sum_, _tense) = df(S, row[i:], dd)
-                if _sum_ + i**2 > sum_:
-                     sum_ = _sum_ + i**2
-                     tense = [row[:i]]+_tense
-        dd[row]=(sum_, tense)
-        return (sum_, tense)
+                (new_sum, new_tense) = df(S, row[i:], dd)
+                if new_sum + i**2 > suma and new_sum > -1:
+                     suma = new_sum + i**2
+                     tense = [row[:i]]+new_tense
+        dd[row]=(suma, tense)
+        return (suma, tense)
+
 print(df(S,"tamatematykapustkinieznosi", {}))
