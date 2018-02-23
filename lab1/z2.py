@@ -3,7 +3,7 @@ S = {}
 with open("polish_words.txt") as f:
     for line in f:
        key= line.split()
-       S[key] = 1
+       S[key[0]] = 1
 
 
 def df(S, row, dd):
@@ -23,4 +23,4 @@ def df(S, row, dd):
         dd[row]=(suma, tense)
         return (suma, tense)
 
-print(df(S,"tamatematykapustkinieznosi", {}))
+print(df(S,"tamatematykapustkinieznosi", {})[1])
