@@ -1,0 +1,2 @@
+black c4 c8 h3
+white a1 b2 c3

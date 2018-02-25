@@ -3,6 +3,7 @@ from z4 import opt_dist
 import time
 start_time = time.time()
 
+
 def printPic(table):
     for x in table:
         print("".join("x" if y else "." for y in x))
@@ -20,8 +21,9 @@ test = [
     ([7, 6, 5, 4, 3, 2, 1], [1, 2, 3, 4, 5, 6, 7]),
     ([7, 5, 3, 1, 1, 1, 1], [1, 2, 3, 7, 3, 2, 1])
 ]
-for (row, col) in test:
 
+
+def makePicture(row, col):
     table = []
     colState = {}
     rowState = {}
@@ -42,11 +44,13 @@ for (row, col) in test:
         loop2 = 0
         while sum(colState.values()):
             i = randint(0, len(col)-1)
-            if loop >= 4*len(col) or loop2 > 4 * len(col):
+            if loop >= 4*len(col) or loop2 >30 * len(col):
                 break
             if loop == 2*len(col):
                 (_i, _j) = (randint(0, len(col)-1), randint(0, len(row)-1))
                 table[_j][_i] ^= 1
+                colState[_i] = opt_dist([x[_i] for x in table], col[_i])[1]
+                rowState[_j] = opt_dist(table[_j], row[_j])[1]
                 loop2 += 1
 
             if colState[i]:
@@ -76,5 +80,10 @@ for (row, col) in test:
                 else:
                     loop += 1
 
-    printPic(table)
-# print("--- %s seconds ---" % (time.time() - start_time))
+    return table
+
+
+for (row, col) in test:
+    printPic(makePicture(row, col))
+
+print("--- %s seconds ---" % (time.time() - start_time))

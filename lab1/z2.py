@@ -2,8 +2,8 @@ S = {}
 
 with open("polish_words.txt") as f:
     for line in f:
-       key= line.split()
-       S[key[0]] = 1
+        key = line.split()
+        S[key[0]] = 1
 
 
 def df(S, row, dd):
@@ -18,9 +18,12 @@ def df(S, row, dd):
             if row[:i] in S:
                 (new_sum, new_tense) = df(S, row[i:], dd)
                 if new_sum + i**2 > suma and new_sum > -1:
-                     suma = new_sum + i**2
-                     tense = [row[:i]]+new_tense
-        dd[row]=(suma, tense)
+                    suma = new_sum + i**2
+                    tense = [row[:i]]+new_tense
+        dd[row] = (suma, tense)
         return (suma, tense)
 
-print(df(S,"tamatematykapustkinieznosi", {})[1])
+with open("input_1.2.txt") as f:
+    for line in f:
+        print("".join(x+' ' for x in df(S, line[:-1], {})[1]))
+
