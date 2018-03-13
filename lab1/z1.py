@@ -58,10 +58,11 @@ def findCheckMate(inputData, debug = 0):
     if isCheckmate(wk, wr, bk):
         end = True
     diag_steps = 0
+    print(1)
     while not end:
         ((player, wk, wr, bk), steps) = queue[0]
-        if steps > diag_steps:
-            print(steps)
+        if steps > diag_steps and debug:
+            print(steps+1)
             diag_steps = steps
         if player == "black":
             movesList = list(filter(lambda x: not isCheck(
@@ -110,7 +111,7 @@ def findCheckMate(inputData, debug = 0):
             move = movesDict[move]
         for l in lista:
             print('♔ : ', l[1], '♖ : ', l[2], '♚ : ', l[3])
-    return steps
+    return steps+1
 
 with open("input_1.1.txt") as f:
     for line in f:

@@ -121,22 +121,22 @@ hand_dict = {9: "straight-flush", 8: "four-of-a-kind", 7: "full-house", 6: "flus
 def create_set(set_type):
     card_set = []
     if set_type == "B":
-        for i in range(2, 10):
+        for i in range(2, 11):
             for c in "CDHS":
                 card_set += [rev_c_dict[i]+c]
         return card_set
     elif set_type == "F":
-        for i in range(10, 15):
+        for i in range(11, 15):
             for c in "CDHS":
                 card_set += [rev_c_dict[i]+c]
         return card_set
 
 
 def get_hand(card_set):
-    hand = []
+    hand = set()
     while len(hand) < 5:
         x = card_set[random.randint(0, len(card_set)-1)]
-        hand += [x]
+        hand = hand | {x}
     return hand
 # print(check_hand(get_hand(create_set("F"))))
 
@@ -145,8 +145,12 @@ def testuj(rounds, repeats):
     for i in range(rounds):
         res = 0
         for j in range(repeats):
-            res = res + 1 if check_hand(get_hand(create_set("F"))) \
-                > check_hand(get_hand(create_set("B"))) else res
+            f = get_hand(create_set("F"))
+            b = get_hand(create_set("B"))
+            # print(f, check_hand(f), b, check_hand(b))
+            res = res + 1 if check_hand(f) \
+                >= check_hand(b) else res
+            
         print(i, " ", res/repeats)
 
 

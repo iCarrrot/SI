@@ -99,3 +99,10 @@ ENV/
 
 # mypy
 .mypy_cache/
+
+#another
+*/validator.py
+*/*input*
+*/input*
+
+lab1/input_1.1.txt
