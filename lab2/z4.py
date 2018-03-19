@@ -54,67 +54,64 @@ def moves(posSet, _dir):
     return tuple(set(sorted(tempList))), 0
 
 
-def faseOne(startTuple):
-    final = ""
+def faseOne(startTuple, _range = 100, _size = 64):
+
+    
     # print(startTuple)
     
     # startTuple, _ = moves(startTuple, 'R')
     
-    # mSet = "UDRL"
+    startTuple1 = startTuple
+    final1 = ""
     for _ in range(len(board)-3):
-        startTuple, _ = moves(startTuple, 'U')
-        final+='U'
+        startTuple1, _ = moves(startTuple1, 'U')
+        final1+='U'
     for _ in range(len(board[0])-3):
-        startTuple, _ = moves(startTuple, 'R')
-        final+='R'
+        startTuple1, _ = moves(startTuple1, 'R')
+        final1+='R'
     for _ in range(len(board)):
-        startTuple, _ = moves(startTuple, 'U')
-        final+='U'
-    # print(len(startTuple))
-    # for _ in range(len(board)*2):
-    #     a = randint(0,3)
-    #     c = mSet[a]
-    #     startTuple, _ = moves(startTuple, c)
-    #     final+=c
-    return startTuple, final
+        startTuple1, _ = moves(startTuple1, 'U')
+        final1+='U'
 
+    # print("1:", len(startTuple1))
 
-def faseOneAndHalf(startTuple):
-    visited = []
-    visited+=[startTuple]
-    queue = deque()
-    queue.append((startTuple,'S'))
-    onGoal = 0
-    length = 0
-    while(not onGoal):
-        (posSet, oldM) = queue[0]
-        if(len(oldM)>length):
-            length+=1
-            # print(length)
-        # print (posSet)
-        # print (oldM)
-        other= []
-        for m in meanMoves[oldM[-1]]:
-            newPos, onGoal = moves(posSet, m)
-            if(len(newPos)<len(posSet)):
-                if onGoal or len(newPos) == 1:
-                    return newPos, oldM[1:]+m
-                if newPos not in visited:
-                    queue.append((newPos,oldM+m))
-                    visited+=[newPos]
+    startTuple = startTuple1
+    mSet = "UDRL"
+    final = final1
+    minLen = len(startTuple)
+    minTuple = startTuple
+    minFinal = ""
+    for _ in range(_range):
+        testTuple = startTuple
+        randomSet = ""
+        for i in range(_size):
+            if not i%5:
+                testTuple, _ = moves(testTuple, mSet[randint(0,3)])
+                randomSet += mSet[randint(0,3)]
             else:
-                other += [(newPos, onGoal)]
-        if len(other) >= 3:
-            for (newPos, onGoal) in other:
-                if onGoal or len(newPos) == 1:
-                    return newPos, oldM[1:]+m
-                if newPos not in visited:
-                    queue.append((newPos,oldM+m))
-                    visited+=[newPos]
-        queue.popleft()
-    return newPos, oldM[1:]
+                testTuple2 = testTuple
+                minLen2 = len(testTuple2)
+                for move in mSet:
+                    # print(" ")
+                    testTuple2, _ = moves(testTuple2, move)
+                    if len(testTuple2)<= minLen2:
+                        minTuple2 = testTuple2
+                        minLen2 = len(testTuple2)
+                        minM = move
+                    # print("   ", len(testTuple2))
+                # print("  ", len(minTuple2))
+                testTuple = minTuple2
+                randomSet+=minM
 
-
+        if len(testTuple)< minLen:
+            minTuple = testTuple
+            minLen = len(testTuple)
+            minFinal = randomSet
+        # print(len(testTuple))
+    startTuple = minTuple
+    final += minFinal
+    # print("2: ",len(startTuple))
+    return startTuple, final
 
 
 
@@ -130,9 +127,9 @@ def faseTwo(startTuple):
         (posSet, oldM) = queue[0]
         # print(oldM)
         # print(visited)
-        if(len(oldM)>length):
-            length+=1
-            print(length)
+        # if(len(oldM)>length):
+        #     length+=1
+        #     print(length)
         # print (posSet)
         # print (oldM)
         for m in meanMoves[oldM[-1]]:
@@ -153,10 +150,14 @@ def solver():
     startTuple = ()
     startTuple = prepareData(startTuple, endDict, board)
     # print(list(startTuple))
-    startTuple, _final = faseOne(startTuple)
+    _, _final = faseOne(startTuple)
+
+    for m in _final:
+        startTuple, _ = moves(startTuple, m)
+
     final+=_final
     print(final)
-
+    print(startTuple)
     # startTuple, _final = faseOneAndHalf(startTuple)
     # final+=_final
     # print(final)

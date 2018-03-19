@@ -21,6 +21,5 @@ def opt_dist(row, size):
 
 # test
 if __name__ == "__main__":
-    opt_dist(row,10)
     for x in range(len(row)+1):
         print(opt_dist(row, x))

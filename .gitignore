@@ -106,3 +106,8 @@ ENV/
 */input*
 
 lab1/input_1.1.txt
+node_modules/*
+*/node_modules/*
+package*
+.vscode/*
+*/.vscode/*
