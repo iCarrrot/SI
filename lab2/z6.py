@@ -61,7 +61,6 @@ def moves(posSet, _dir):
     return tuple(set(sorted(tempList))), 0
 
 
-
 def findDists(dists):
     queue = deque()
     visited = set()
@@ -96,7 +95,7 @@ def heuristic(currentTuple, dists):
     return _max
 
 
-def Astar(startTuple, dists):
+def Astar(startTuple, dists, n):
     visited = set()
     visited.add(startTuple)
 
@@ -115,7 +114,7 @@ def Astar(startTuple, dists):
                 return oldM[1:]+m
             if newPos not in visited:
 
-                queue.put((len(oldM)+heuristic(newPos, dists), len(oldM), newPos, oldM+m))
+                queue.put((len(oldM)+n*heuristic(newPos, dists), len(oldM), newPos, oldM+m))
                 # print("  ", len(oldM)+heuristic(newPos, dists),
                 #       len(oldM), heuristic(newPos, dists), newPos, oldM+m)
                 visited.add(newPos)
@@ -131,7 +130,7 @@ def solver():
 
     # print(dists)
 
-    final += Astar(startTuple, dists)
+    final += Astar(startTuple, dists, 2)
     # print(list(startTuple))
     # _, _final = faseOne(startTuple)
 

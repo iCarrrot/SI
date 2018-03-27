@@ -1,8 +1,9 @@
 from collections import deque
-from random import randint
+from random import randint, seed
+
 board = []
 dirValue = {'U': (0, 1), 'D': (0, -1), 'R': (-1, 0), 'L': (1, 0)}
-meanMoves = {'S':'DURL', 'D':'DRL', 'U': 'URL', 'R':'DUR', 'L':'DUL'} 
+meanMoves = {'S':'DURL', 'D':'DURL', 'U': 'DURL', 'R':'DURL', 'L':'DURL'} 
 startTuple = ()
 endDict = dict()
 
@@ -56,11 +57,6 @@ def moves(posSet, _dir):
 
 def faseOne(startTuple, _range = 100, _size = 64):
 
-    
-    # print(startTuple)
-    
-    # startTuple, _ = moves(startTuple, 'R')
-    
     startTuple1 = startTuple
     final1 = ""
     for _ in range(len(board)-3):
@@ -72,8 +68,6 @@ def faseOne(startTuple, _range = 100, _size = 64):
     for _ in range(len(board)):
         startTuple1, _ = moves(startTuple1, 'U')
         final1+='U'
-
-    # print("1:", len(startTuple1))
 
     startTuple = startTuple1
     mSet = "UDRL"
@@ -149,24 +143,14 @@ def solver():
     final = ''
     startTuple = ()
     startTuple = prepareData(startTuple, endDict, board)
-    # print(list(startTuple))
     _, _final = faseOne(startTuple)
-
     for m in _final:
         startTuple, _ = moves(startTuple, m)
-
-    final+=_final
-    print(final)
     print(startTuple)
-    # startTuple, _final = faseOneAndHalf(startTuple)
-    # final+=_final
-    # print(final)
-    # print(list(startTuple))
+    final+=_final
     
     final += faseTwo(startTuple)
-    # final+="DRRRRDRRRRRRURRD"
     file = open("zad_output.txt", "w")
     file.write(final)
     file.close()
-# board = []
 solver()
