@@ -16,7 +16,6 @@ def prepareData(startTuple, endDict, board):
     for row in board:
         _x = 0
         for l in row:
-            
             if l == 'S':
                 startTuple+=((_x, _y),)
             elif l == 'G':
@@ -153,4 +152,5 @@ def solver():
     file = open("zad_output.txt", "w")
     file.write(final)
     file.close()
+
 solver()

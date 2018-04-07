@@ -111,3 +111,6 @@ node_modules/*
 package*
 .vscode/*
 */.vscode/*
+*/zad_output.txt
+*/zad_input.txt
+ */*temp*
