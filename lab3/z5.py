@@ -48,7 +48,7 @@ def sudoku(assigments):
     print 'solve([' + ', '.join(variables) + ']) :- '
     
     
-    cs = domains(variables) + vertical() + horizontal() + square() #TODO: too weak contraints, add something!
+    cs = domains(variables) + vertical() + horizontal() + square() 
     for i,j,val in assigments:
         cs.append( '%s #= %d' % (V(i,j), val) )
     
