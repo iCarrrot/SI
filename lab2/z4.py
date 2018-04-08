@@ -3,7 +3,6 @@ from random import randint, seed
 
 board = []
 dirValue = {'U': (0, 1), 'D': (0, -1), 'R': (-1, 0), 'L': (1, 0)}
-meanMoves = {'S':'DURL', 'D':'DURL', 'U': 'DURL', 'R':'DURL', 'L':'DURL'} 
 startTuple = ()
 endDict = dict()
 
@@ -41,11 +40,8 @@ def move(pos, _dir):
 def moves(posSet, _dir):
     onGoal = 0
     tempList = []
-    # print("p", posSet)
     for i in posSet:
-        # print(i)
         t, _inG = move(i, _dir)
-        # print(t)
         onGoal += _inG
         tempList+=[t]
 
@@ -85,14 +81,11 @@ def faseOne(startTuple, _range = 100, _size = 64):
                 testTuple2 = testTuple
                 minLen2 = len(testTuple2)
                 for move in mSet:
-                    # print(" ")
                     testTuple2, _ = moves(testTuple2, move)
                     if len(testTuple2)<= minLen2:
                         minTuple2 = testTuple2
                         minLen2 = len(testTuple2)
                         minM = move
-                    # print("   ", len(testTuple2))
-                # print("  ", len(minTuple2))
                 testTuple = minTuple2
                 randomSet+=minM
 
@@ -100,10 +93,8 @@ def faseOne(startTuple, _range = 100, _size = 64):
             minTuple = testTuple
             minLen = len(testTuple)
             minFinal = randomSet
-        # print(len(testTuple))
     startTuple = minTuple
     final += minFinal
-    # print("2: ",len(startTuple))
     return startTuple, final
 
 
@@ -114,18 +105,9 @@ def faseTwo(startTuple):
     queue = deque()
     queue.append((startTuple,'S'))
     onGoal = 0
-    length = 0
-    # print(queue)
     while(not onGoal):
         (posSet, oldM) = queue[0]
-        # print(oldM)
-        # print(visited)
-        # if(len(oldM)>length):
-        #     length+=1
-        #     print(length)
-        # print (posSet)
-        # print (oldM)
-        for m in meanMoves[oldM[-1]]:
+        for m in "UDRL":
             newPos, onGoal = moves(posSet, m)
             if onGoal:
                 return oldM[1:]+m
@@ -145,7 +127,6 @@ def solver():
     _, _final = faseOne(startTuple)
     for m in _final:
         startTuple, _ = moves(startTuple, m)
-    print(startTuple)
     final+=_final
     
     final += faseTwo(startTuple)

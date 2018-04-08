@@ -3,7 +3,6 @@ from queue import PriorityQueue
 from random import randint
 board = []
 dirValue = {'U': (0, 1), 'D': (0, -1), 'R': (-1, 0), 'L': (1, 0)}
-meanMoves ="DURL"# {'S': 'DURL', 'D': 'DRL', 'U': 'URL', 'R': 'DUR', 'L': 'DUL'}
 
 startTuple = ()
 endDict = dict()
@@ -48,11 +47,8 @@ def move(pos, _dir):
 def moves(posSet, _dir):
     onGoal = 0
     tempList = []
-    # print("p", posSet)
     for i in posSet:
-        # print(i)
         t, _inG = move(i, _dir)
-        # print(t)
         onGoal += _inG
         tempList += [t]
 
@@ -71,19 +67,14 @@ def findDists(dists):
                 dists[y-y1][x-x1] = 1
                 queue.append((x-x1, y-y1))
                 visited.add((x-x1, y-y1))
-    # print(dists)
     while len(queue):
         (x, y) = queue[0]
-        # print(x, y)
         for x1, y1 in [(1, 0), (-1, 0), (0, 1), (0, -1)]:
             if dists[y-y1][x-x1] == -1 and (x-x1, y-y1) not in visited:
                 visited.add((x-x1, y-y1))
                 dists[y-y1][x-x1] = dists[y][x]+1
                 queue.append((x-x1, y-y1))
-        # print(dists)
-
         queue.popleft()
-    # print(dists)
     return dists
 
 
@@ -102,21 +93,15 @@ def Astar(startTuple, dists, n):
     queue = PriorityQueue()
     queue.put((heuristic(startTuple, dists),0, startTuple, 'S'))
     onGoal = 0
-    length = 0
     while(not onGoal):
         (_,_, posSet, oldM) = queue.get()
-        # visited.add(posSet)
-        # print(visited)
-        # print(posSet)
-        for m in meanMoves:
+        for m in "UDRL":
             newPos, onGoal = moves(posSet, m)
             if onGoal:
                 return oldM[1:]+m
             if newPos not in visited:
 
                 queue.put((len(oldM)+n*heuristic(newPos, dists), len(oldM), newPos, oldM+m))
-                # print("  ", len(oldM)+heuristic(newPos, dists),
-                #       len(oldM), heuristic(newPos, dists), newPos, oldM+m)
                 visited.add(newPos)
 
     return oldM[1:]
@@ -127,27 +112,9 @@ def solver():
     startTuple = ()
     startTuple, dists = prepareData(startTuple, endDict, board)
     dists = findDists(dists)
-
-    # print(dists)
-
     final += Astar(startTuple, dists, 2)
-    # print(list(startTuple))
-    # _, _final = faseOne(startTuple)
-
-    # for m in _final:
-    #     startTuple, _ = moves(startTuple, m)
-
-    # final+=_final
-    # print(final)
-    # print(startTuple)
-
-    # final += faseTwo(startTuple)
-    # final+="DRRRRDRRRRRRURRD"
-    # print(final)
     file = open("zad_output.txt", "w")
     file.write(final)
     file.close()
 
-
-# board = []
 solver()

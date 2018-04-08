@@ -34,6 +34,52 @@ def prepareData(startTuple, endDict, board):
     return startTuple, dists
 
 
+def faseOne(startTuple, _range = 100, _size = 64):
+
+    startTuple1 = startTuple
+    final1 = ""
+    for _ in range(len(board)-3):
+        startTuple1, _ = moves(startTuple1, 'U')
+        final1+='U'
+    for _ in range(len(board[0])-3):
+        startTuple1, _ = moves(startTuple1, 'R')
+        final1+='R'
+
+    startTuple = startTuple1
+    mSet = "UDRL"
+    final = final1
+    minLen = len(startTuple)
+    minTuple = startTuple
+    minFinal = ""
+    for _ in range(_range):
+        testTuple = startTuple
+        randomSet = ""
+        for i in range(_size):
+            if not i%5:
+                testTuple, _ = moves(testTuple, mSet[randint(0,3)])
+                randomSet += mSet[randint(0,3)]
+            else:
+                testTuple2 = testTuple
+                minLen2 = len(testTuple2)
+                for move in mSet:
+                    testTuple2, _ = moves(testTuple2, move)
+                    if len(testTuple2)<= minLen2:
+                        minTuple2 = testTuple2
+                        minLen2 = len(testTuple2)
+                        minM = move
+                testTuple = minTuple2
+                randomSet+=minM
+
+        if len(testTuple)< minLen:
+            minTuple = testTuple
+            minLen = len(testTuple)
+            minFinal = randomSet
+    startTuple = minTuple
+    final += minFinal
+    return startTuple, final
+
+
+
 def move(pos, _dir):
     x, y = pos
     x1, y1 = dirValue[_dir]
@@ -57,7 +103,6 @@ def moves(posSet, _dir):
     return tuple(set(sorted(tempList))), 0
 
 
-
 def findDists(dists):
     queue = deque()
     visited = set()
@@ -75,7 +120,6 @@ def findDists(dists):
                 visited.add((x-x1, y-y1))
                 dists[y-y1][x-x1] = dists[y][x]+1
                 queue.append((x-x1, y-y1))
-
         queue.popleft()
     return dists
 
@@ -88,7 +132,7 @@ def heuristic(currentTuple, dists):
     return _max
 
 
-def Astar(startTuple, dists):
+def Astar(startTuple, dists, n):
     visited = set()
     visited.add(startTuple)
 
@@ -103,7 +147,7 @@ def Astar(startTuple, dists):
                 return oldM[1:]+m
             if newPos not in visited:
 
-                queue.put((len(oldM)+heuristic(newPos, dists), len(oldM), newPos, oldM+m))
+                queue.put((len(oldM)+n*heuristic(newPos, dists), len(oldM), newPos, oldM+m))
                 visited.add(newPos)
 
     return oldM[1:]
@@ -114,11 +158,18 @@ def solver():
     startTuple = ()
     startTuple, dists = prepareData(startTuple, endDict, board)
     dists = findDists(dists)
+    
+    _, _final = faseOne(startTuple, _size=1)
+    for m in _final:
+        startTuple, _ = moves(startTuple, m)
+    final+=_final
 
-    final += Astar(startTuple, dists)
+    final += Astar(startTuple, dists, 2.5)
 
     file = open("zad_output.txt", "w")
     file.write(final)
     file.close()
 
+
+# board = []
 solver()
