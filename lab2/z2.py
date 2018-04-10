@@ -1,5 +1,6 @@
 from collections import deque
 from queue import PriorityQueue
+import sys
 
 board = []
 dirValue = {'U': (0, 1), 'D': (0, -1), 'R': (-1, 0), 'L': (1, 0)}
@@ -137,7 +138,6 @@ def Astar(startPos, startBoxTuple, dists):
     queue.put((heuristic(startBoxTuple, dists),
                0, (startPos, startBoxTuple), 'S'))
     onGoal = 0
-    length = 0
     while(not onGoal):
         (_, _, (pos, boxTuple), way) = queue.get()
         # visited.add(posSet)
@@ -162,10 +162,13 @@ def Astar(startPos, startBoxTuple, dists):
 def solver():
     final = ''
     boxTuple, pos, dists = prepareData()
+    # print(sys.argv)
     # print(boxTuple,pos)
     # print(goals, len(goals))
-    # final = bfs(pos, boxTuple)
-    final = Astar(pos, boxTuple, dists)
+    if sys.argv[1] == "bfs":
+        final = bfs(pos, boxTuple)
+    elif sys.argv[1] == "a*":
+        final = Astar(pos, boxTuple, dists)
     # print(final)
     file = open("zad_output.txt", "w")
     file.write(final)

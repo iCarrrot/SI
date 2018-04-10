@@ -112,7 +112,12 @@ package*
 .vscode/*
 */.vscode/*
 */zad_output.txt
-*/zad_input.txt
- */*temp*
-lab3/temp-pogram.pl
-lab2/zad_output.txt
+*zad_input.txt
+*temp*
+temp-pogram.pl
+zad_output.txt
+prolog_result.txt
+zad_output.pl
+a.out
+solution.pl
+**zad_output.txt

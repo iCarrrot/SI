@@ -1,5 +1,6 @@
 import sys
 
+result = ""
 
 def V(i,j):
     return 'V%d_%d' % (i,j)
@@ -31,14 +32,14 @@ def square():
 
 def print_constraints(Cs, indent, d):
     position = indent
-    print (indent - 1) * ' ',
+    print (indent - 1) * ' '
     for c in Cs:
         print c + ',',
         position += len(c)
         if position > d:
             position = indent
             print
-            print (indent - 1) * ' ',
+            print (indent - 1) * ' '
 
       
 def sudoku(assigments):
