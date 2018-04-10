@@ -31,22 +31,24 @@ def square():
     return [all_different(get_square(i,j)) for i in range(3) for j in range(3)]
 
 def print_constraints(Cs, indent, d):
+    global result
     position = indent
-    print (indent - 1) * ' '
+    result += (indent - 1) * ' ' + "\n"
     for c in Cs:
-        print c + ',',
+        result += c + ',' + "\n"
         position += len(c)
         if position > d:
             position = indent
-            print
-            print (indent - 1) * ' '
+            result+="\n"
+            result += (indent - 1) * ' ' + "\n"
 
       
 def sudoku(assigments):
+    global result
     variables = [ V(i,j) for i in range(9) for j in range(9)]
     
-    print ':- use_module(library(clpfd)).'
-    print 'solve([' + ', '.join(variables) + ']) :- '
+    result += ':- use_module(library(clpfd)).' + "\n"
+    result += 'solve([' + ', '.join(variables) + ']) :- ' + "\n"
     
     
     cs = domains(variables) + vertical() + horizontal() + square() 
@@ -54,23 +56,26 @@ def sudoku(assigments):
         cs.append( '%s #= %d' % (V(i,j), val) )
     
     print_constraints(cs, 4, 70),
-    print
-    print '    labeling([ff], [' +  ', '.join(variables) + ']).' 
-    print 
-    print ':- solve(X), write(X), nl.'       
+    result+="\n"
+    result += '    labeling([ff], [' +  ', '.join(variables) + ']).'  + "\n"
+    result += "\n"
+    result += ':- solve(X), open("prolog_result.txt", write, Stream),write(Stream, X),close(Stream), nl.\n' 
 
 if __name__ == "__main__":
     raw = 0
     triples = []
-    
-    for x in sys.stdin:
-        x = x.strip()
-        if len(x) == 9:
-            for i in range(9):
-                if x[i] != '.':
-                    triples.append( (raw,i,int(x[i])) ) 
-            raw += 1          
+    with open("/home/michal/SI/lab3/zad_input.txt") as f:
+        for x in f:
+            x = x.strip()
+            if len(x) == 9:
+                for i in range(9):
+                    if x[i] != '.':
+                        triples.append( (raw,i,int(x[i])) ) 
+                raw += 1          
     sudoku(triples)
+    file = open("zad_output.txt", "w")
+    file.write(result)
+    file.close()
     
 """
 89.356.1.
