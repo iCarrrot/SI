@@ -73,11 +73,11 @@ def bestFirstSearch(startPos, startBoxTuple, dists):
         # visited.add(posSet)
         # print(visited)
         # print(posSet)
-        avible = Kmoves(pos, boxTuple)  # TODO:
+        avible = Kmoves(pos, boxTuple)
         # print(avible)
         # print(level)
-        if(level >= length):
-            length += 1
+        # if(level >= length):
+        #     length += 1
             # print(length)
 
         for box in boxTuple:

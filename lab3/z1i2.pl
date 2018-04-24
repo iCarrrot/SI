@@ -20,10 +20,11 @@ bitsCheck(Index, [B|Bits], Starts, Lengths):-
     bitCheck(Index, B, 0,Starts, Lengths),
     bitsCheck(Index1, Bits, Starts, Lengths).
 
-bitCheck(Index,B,Last,[],[]) :- Index #>= Last #==> B#=0.
+bitCheck(Index,B,Last,[],[]) :- 
+    Index #>= Last #==> B#=0.
+
 bitCheck(Index, Bit, Last, [Start|SS], [L|Lengths]):-
     E #= Start + L,
-    % print(Bit),
     Index #<Start #/\ Index #>= Last #==> Bit #= 0,
     Index #>= Start #/\  Index #< E #==> Bit #=1,
     
@@ -32,25 +33,48 @@ bitCheck(Index, Bit, Last, [Start|SS], [L|Lengths]):-
 rowCheck(Size,Starts,Lengths,Bits):-
     lengthCheck(Size,Starts,Lengths),
     bitsCheck(0,Bits,Starts,Lengths).
-bit(N):- N in 0..1.
-starts(Len, X):- X in 0..Len.
-reversLength(X,Ys):-length(Ys,X).
-solveRow(Size, Lengths,Bits):-
-    % print(Bits),
-    length(Lengths, Len),
+
+setStartsDomain(_,[]).
+setStartsDomain(Size, [H|T]):-
+    H in 0..Size,
+    setStartsDomain(Size,T).
+
+solveRows(_,[],_).
+solveRows(Size, [H|T], [B|Bits]):-
+    length(H, Len),
     length(Starts, Len),
-    maplist(starts(Size), Starts),
-    rowCheck(Size,Starts,Lengths,Bits).
+    setStartsDomain(Size, Starts),
+    rowCheck(Size,Starts,H,B),
+    solveRows(Size,T,Bits).
+
+
+setLen(_,[]).
+setLen(Len, [H|T]):- 
+    length(H, Len),
+    setLen(Len, T).
+
+setDomainList([]).
+setDomainList([H|T]):-
+    setDomain(H),
+    setDomainList(T).
+
+setDomain([]).
+setDomain([H|T]):-
+    H in 0..1,
+    setDomain(T).
+
+
+
 
 fullCheck(Rows, Cols, Bits):-
     length(Rows, RowLen),
     length(Cols, ColLen),
     length(Bits, RowLen),
-    maplist(reversLength(ColLen), Bits),
-    maplist(maplist(bit),Bits),
+    setLen(ColLen, Bits),
+    setDomainList(Bits),
     transpose(Bits, BitsCol),
-    maplist(solveRow(ColLen),Rows,Bits),
-    maplist(solveRow(RowLen),Cols,BitsCol).
+    solveRows(ColLen, Rows, Bits),
+    solveRows(RowLen, Cols, BitsCol).
 
 
 line([X|Xs])--> integer(X),whites, line(Xs).
@@ -72,6 +96,7 @@ getData(Rows, Cols):-
 dict(1, "#").
 dict(0, ".").
 
+
 rowPrint(Stream, [H|T]):-  write(Stream,H),rowPrint(Stream,T).
 rowPrint(Stream,[]):-nl(Stream).
 picturePrint(Bits):-
@@ -83,9 +108,6 @@ picturePrint(Bits):-
 main(_):-
     getData(Rows,Cols),
     fullCheck(Rows,Cols, Bits),
-    % print(Bits),
     picturePrint(Bits),
-    % show_board("zad_output.txt", Bits),
     halt.
-    
 
