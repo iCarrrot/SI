@@ -14,53 +14,88 @@ SY = 0
 M = 8
 
 
-def kwadrat(x, y, kolor):
-    fillcolor(kolor)
-    pu()
-    goto(SX + x * BOK, SY + y * BOK)
-    pd()
-    begin_fill()
-    for i in range(4):
-        fd(BOK)
-        rt(90)
-    end_fill()
+# def kwadrat(x, y, kolor):
+#     fillcolor(kolor)
+#     pu()
+#     goto(SX + x * BOK, SY + y * BOK)
+#     pd()
+#     begin_fill()
+#     for i in range(4):
+#         fd(BOK)
+#         rt(90)
+#     end_fill()
 
 
-def kolko(x, y, kolor):
-    fillcolor(kolor)
+# def kolko(x, y, kolor):
+#     fillcolor(kolor)
 
-    pu()
-    goto(SX + x * BOK + BOK/2, SY + y * BOK - BOK)
-    pd()
-    begin_fill()
-    circle(BOK/2)
-    end_fill()
+#     pu()
+#     goto(SX + x * BOK + BOK/2, SY + y * BOK - BOK)
+#     pd()
+#     begin_fill()
+#     circle(BOK/2)
+#     end_fill()
 
 #####################################################
 
 
 def initial_board():
-    B = [[None] * M for i in range(M)]
+    B = [[None] * M for _ in range(M)]
     B[3][3] = 1
     B[4][4] = 1
     B[3][4] = 0
     B[4][3] = 0
     return B
 
+def playGame(player, B, isRandom):
+    while True:
+        if isRandom:
+            m = B.random_move(player)
+            B.do_move(m, player)
+            player = 1-player
+            # raw_input()
+            if B.terminal():
+                break
+        else:
+            if not player:
+                m = B.random_move(player)
+                B.do_move(m, player)
+                player = 1-player
+                # raw_input()
+                if B.terminal():
+                    break
+            else:
+                # m = B.greedy_move(player)
+                m = B.semi_random_move(player, 100)
+                print m
+                B.do_move(m, player)
+                player = 1-player
+                # raw_input()
+                if B.terminal():
+                    break
 
 class Board:
     dirs = [(0, 1), (1, 0), (-1, 0), (0, -1),
             (1, 1), (-1, -1), (1, -1), (-1, 1)]
 
-    def __init__(self):
-        self.board = initial_board()
-        self.fields = set()
-        self.move_list = []
-        self.history = []
-        for i in range(M):
-            for j in range(M):
-                if self.board[i][j] == None:
-                    self.fields.add((j, i))
+    def __init__(self, *args):
+        if len(args)>0 and type(args[0]) == type(dict()):
+            initialDict = args[0]
+            self.board = initialDict["board"]
+            self.fields = initialDict["fields"]
+            self.move_list = initialDict["move_list"]
+            self.history = initialDict["history"]
+            
+        else:
+            self.board = initial_board()
+            self.fields = set()
+            self.move_list = []
+            self.history = []
+            for i in range(M):
+                for j in range(M):
+                    if self.board[i][j] == None:   
+                        self.fields.add( (j,i) )
+                                        
 
     def draw(self):
         for i in range(M):
@@ -77,17 +112,17 @@ class Board:
             print ''.join(res)
         print
 
-    def show(self):
-        for i in range(M):
-            for j in range(M):
-                kwadrat(j, i, 'green')
+    # def show(self):
+    #     for i in range(M):
+    #         for j in range(M):
+    #             kwadrat(j, i, 'green')
 
-        for i in range(M):
-            for j in range(M):
-                if self.board[i][j] == 1:
-                    kolko(j, 7-i, 'black')
-                if self.board[i][j] == 0:
-                    kolko(j, 7-i, 'white')
+    #     for i in range(M):
+    #         for j in range(M):
+    #             if self.board[i][j] == 1:
+    #                 kolko(j, 7-i, 'black')
+    #             if self.board[i][j] == 0:
+    #                 kolko(j, 7-i, 'white')
 
     def moves(self, player):
         res = []
@@ -167,7 +202,7 @@ class Board:
             return random.choice(ms)[0]
         return [None]
 
-    def good_move(self, player):
+    def greedy_move(self, player):
         ms = self.moves(player)
         # print player, ms
         if ms!= [None] and ms:
@@ -178,30 +213,41 @@ class Board:
             return bestM
         return [None]
 
+    def semi_random_move(self, player, tries):
+        ms = self.moves(player)
+        # print player, ms
+        if ms!= [None] and ms:
+            _max, bestM = -1, tuple()
+            for (m,_) in ms:
+                initialDict = {
+                    "board" : self.board,
+                    "fields": self.fields,
+                    "move_list":self.move_list,
+                    "history": self.history,
+                }
+                wins = 0
+                for i in range(tries):
+                    tempBoard = Board(initialDict)
+                    tempBoard.do_move(m,player)
+                    player = 1-player
+                    playGame(player=player, B=tempBoard, isRandom=True)
+                    r = tempBoard.result()
+                    if r>0:
+                        wins+=1
+                moveRatio = 100.*wins/i
+                if moveRatio > _max:
+                    _max = moveRatio
+                    bestM = m
+            return bestM
+        return [None]
+
 win = 0
-tries = 1000
+tries = 100
+
 for i in range(tries):
     player = 0
     B = Board()
-
-    while True:
-        # B.draw()
-        # B.show()
-        if not player:
-            m = B.random_move(player)
-            B.do_move(m, player)
-            player = 1-player
-            # raw_input()
-            if B.terminal():
-                break
-        else:
-            m = B.good_move(player)
-            
-            B.do_move(m, player)
-            player = 1-player
-            # raw_input()
-            if B.terminal():
-                break
+    playGame(player=player, B=B, isRandom=False)
 
     # B.draw()
     # B.show()
