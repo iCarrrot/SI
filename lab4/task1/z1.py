@@ -1,42 +1,13 @@
 import random
 import sys
 from collections import defaultdict as dd
-# from turtle import *
-
-#####################################################
-# turtle graphic
-#####################################################
-# tracer(0, 1)
+import copy
+import time
 
 BOK = 30
 SX = -100
 SY = 0
 M = 8
-
-
-# def kwadrat(x, y, kolor):
-#     fillcolor(kolor)
-#     pu()
-#     goto(SX + x * BOK, SY + y * BOK)
-#     pd()
-#     begin_fill()
-#     for i in range(4):
-#         fd(BOK)
-#         rt(90)
-#     end_fill()
-
-
-# def kolko(x, y, kolor):
-#     fillcolor(kolor)
-
-#     pu()
-#     goto(SX + x * BOK + BOK/2, SY + y * BOK - BOK)
-#     pd()
-#     begin_fill()
-#     circle(BOK/2)
-#     end_fill()
-
-#####################################################
 
 
 def initial_board():
@@ -47,55 +18,20 @@ def initial_board():
     B[4][3] = 0
     return B
 
-def playGame(player, B, isRandom):
-    while True:
-        if isRandom:
-            m = B.random_move(player)
-            B.do_move(m, player)
-            player = 1-player
-            # raw_input()
-            if B.terminal():
-                break
-        else:
-            if not player:
-                m = B.random_move(player)
-                B.do_move(m, player)
-                player = 1-player
-                # raw_input()
-                if B.terminal():
-                    break
-            else:
-                # m = B.greedy_move(player)
-                m = B.semi_random_move(player, 100)
-                print m
-                B.do_move(m, player)
-                player = 1-player
-                # raw_input()
-                if B.terminal():
-                    break
 
 class Board:
     dirs = [(0, 1), (1, 0), (-1, 0), (0, -1),
             (1, 1), (-1, -1), (1, -1), (-1, 1)]
 
-    def __init__(self, *args):
-        if len(args)>0 and type(args[0]) == type(dict()):
-            initialDict = args[0]
-            self.board = initialDict["board"]
-            self.fields = initialDict["fields"]
-            self.move_list = initialDict["move_list"]
-            self.history = initialDict["history"]
-            
-        else:
-            self.board = initial_board()
-            self.fields = set()
-            self.move_list = []
-            self.history = []
-            for i in range(M):
-                for j in range(M):
-                    if self.board[i][j] == None:   
-                        self.fields.add( (j,i) )
-                                        
+    def __init__(self):
+        self.board = initial_board()
+        self.fields = set()
+        self.move_list = []
+        self.revNum = [2, 2]
+        for i in range(M):
+            for j in range(M):
+                if self.board[i][j] == None:
+                    self.fields.add((j, i))
 
     def draw(self):
         for i in range(M):
@@ -112,28 +48,11 @@ class Board:
             print ''.join(res)
         print
 
-    # def show(self):
-    #     for i in range(M):
-    #         for j in range(M):
-    #             kwadrat(j, i, 'green')
-
-    #     for i in range(M):
-    #         for j in range(M):
-    #             if self.board[i][j] == 1:
-    #                 kolko(j, 7-i, 'black')
-    #             if self.board[i][j] == 0:
-    #                 kolko(j, 7-i, 'white')
-
     def moves(self, player):
         res = []
         for (x, y) in self.fields:
-            count = 0
-            for direction in Board.dirs:
-                isOk, cnt = self.can_beat(x, y, direction, player)
-                if isOk:
-                    count += cnt
-            if count > 0:
-                res.append(((x, y), count), )
+            if any(self.can_beat(x, y, direction, player) for direction in Board.dirs):
+                res.append((x, y))
         if not res:
             return [None]
         return res
@@ -147,7 +66,7 @@ class Board:
             x += dx
             y += dy
             cnt += 1
-        return cnt > 0 and self.get(x, y) == player, cnt
+        return cnt > 0 and self.get(x, y) == player
 
     def get(self, x, y):
         if 0 <= x < M and 0 <= y < M:
@@ -155,14 +74,14 @@ class Board:
         return None
 
     def do_move(self, move, player):
-        self.history.append([x[:] for x in self.board])
         self.move_list.append(move)
-
+        # print move
         if move == [None] or move == None:
             return
         x, y = move
         x0, y0 = move
         self.board[y][x] = player
+        self.revNum[player] += 1
         self.fields -= set([move])
         for dx, dy in self.dirs:
             x, y = x0, y0
@@ -176,17 +95,12 @@ class Board:
             if self.get(x, y) == player:
                 for (nx, ny) in to_beat:
                     self.board[ny][nx] = player
+                    self.revNum[player] += 1
+                    self.revNum[1-player] -= 1
 
     def result(self):
-        res = 0
-        for y in range(M):
-            for x in range(M):
-                b = self.board[y][x]
-                if b == 0:
-                    res -= 1
-                elif b == 1:
-                    res += 1
-        return res
+
+        return self.revNum[1] - self.revNum[0]
 
     def terminal(self):
         if not self.fields:
@@ -197,66 +111,130 @@ class Board:
 
     def random_move(self, player):
         ms = self.moves(player)
-        # print ms
         if ms and ms != [None]:
-            return random.choice(ms)[0]
+            return random.choice(ms)
         return [None]
 
     def greedy_move(self, player):
         ms = self.moves(player)
         # print player, ms
-        if ms!= [None] and ms:
+        if ms != [None] and ms:
             _max, bestM = 0, tuple()
-            for (m,cnt) in ms:
+            for (m, cnt) in ms:
                 if cnt > _max:
-                    _max, bestM = cnt, m 
+                    _max, bestM = cnt, m
             return bestM
         return [None]
 
-    def semi_random_move(self, player, tries):
+    def heuristicMove(self, player):
         ms = self.moves(player)
-        # print player, ms
-        if ms!= [None] and ms:
-            _max, bestM = -1, tuple()
-            for (m,_) in ms:
-                initialDict = {
-                    "board" : self.board,
-                    "fields": self.fields,
-                    "move_list":self.move_list,
-                    "history": self.history,
-                }
-                wins = 0
-                for i in range(tries):
-                    tempBoard = Board(initialDict)
-                    tempBoard.do_move(m,player)
-                    player = 1-player
-                    playGame(player=player, B=tempBoard, isRandom=True)
-                    r = tempBoard.result()
-                    if r>0:
-                        wins+=1
-                moveRatio = 100.*wins/i
-                if moveRatio > _max:
-                    _max = moveRatio
-                    bestM = m
-            return bestM
+        # print ms
+        if ms and ms != [None]:
+            res = []
+            for move in ms:
+                res.append((val(nextS(self, move, player), 1-player), move))
+
+            def max_fn(value): return value[0]
+            return max(res, key=max_fn)[1]
         return [None]
 
-win = 0
-tries = 100
 
-for i in range(tries):
+def nextS(state, move, player):
+    nextS = copy.deepcopy(state)
+    nextS.do_move(move, player)
+    return nextS
+
+
+def val(current_state, player):
+    if current_state.terminal():
+        return current_state.result()
+    return heuristic_value(current_state, 1-player)
+
+
+def corners(state, player):
+    res = 0
+    for (i, j) in [(0, 0), (0, 7), (7, 0), (7, 7)]:
+        if state.board[i][j] == player:
+            res += 1
+    return res
+
+
+def corners_neighbours(state, player):
+    res = 0
+    cornerDict = {
+        (0,0): [(1, 0), (0, 1), (1,1)],
+        (0,7): [(1, 7), (0, 6), (1,6)],
+        (7,0): [(7, 1), (6, 0), (6,1)],
+        (7,7): [(7, 6), (6, 7), (6,6)]
+         }
+    for (i, j) in [(0, 0), (0, 7), (7, 0), (7, 7)]:
+        if state.board[i][j] == None:
+            for el in cornerDict[(i,j)]:
+                (i1, j1) = el
+                if state.board[i1][j1] == player:
+                    res += 1
+    return res
+
+
+
+def heuristic_value(state, player):
+    res = 0
+    coin_parity = float(state.result()) / \
+        sum(state.revNum)  # procent pionków
+
+    ending = (sum(state.revNum) > 55) * coin_parity
+
+    corners_captured = corners(state, player) \
+        - corners(state, 1-player)
+
+    mobility = len(state.moves(player)) \
+        - len(state.moves(1-player))
+
+    corners_neighbourhood = corners_neighbours(state, player) \
+        - corners_neighbours(state, 1-player)
+
+    res += 200 * corners_captured \
+        + 20 * mobility \
+        - 150 * corners_neighbourhood \
+        + 20 * ending
+    return res
+
+
+def playGame(player, B):
+    while True:
+        if not player:
+            m = B.random_move(player)
+        else:
+            m = B.heuristicMove(player)
+        # print m
+        if m and m != None:
+            B.do_move(m, player)
+        player = 1-player
+        # B.draw()
+        # raw_input()
+        if B.terminal():
+            break
+
+
+defs = 0
+tries = 1000
+start_time = time.time()
+for i in range(1, tries+1):
     player = 0
     B = Board()
-    playGame(player=player, B=B, isRandom=False)
+    playGame(player=player, B=B)
 
     # B.draw()
     # B.show()
     r = B.result()
-    print i, ': Result', r
-    if r > 0:
-        win+=1
-    # raw_input('Game over!')
 
+    if r < 0:
+        defs += 1
+
+    # raw_input('Game over!')
+    if not i % 5:
+        print i, ': Result', r, defs
+        print("--- %s seconds ---" % (time.time() - start_time))
 
     # sys.exit(0)
-print 100.*win/tries, "% wygranych"
+print 100 - 100.*defs/tries, "% wygranych"

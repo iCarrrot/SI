@@ -310,7 +310,7 @@ for _ in range(tries):
     while True:
         # B.draw()
         if not player:
-            m = randomAgent(B,player,2000)
+            m = randomAgent(B,player,6000)
         else:
             # m = B.random_move(player)
             m = betterAgent(B,player)
