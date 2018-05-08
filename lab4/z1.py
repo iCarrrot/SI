@@ -162,19 +162,20 @@ def corners(state, player):
 def corners_neighbours(state, player):
     res = 0
     cornerDict = {
-        (0,0): [(1, 0), (0, 1), (1,1)],
-        (0,7): [(1, 7), (0, 6), (1,6)],
-        (7,0): [(7, 1), (6, 0), (6,1)],
-        (7,7): [(7, 6), (6, 7), (6,6)]
-         }
+        (0, 0): [(1, 0), (0, 1), (1, 1)],
+        (0, 7): [(1, 7), (0, 6), (1, 6)],
+        (7, 0): [(7, 1), (6, 0), (6, 1)],
+        (7, 7): [(7, 6), (6, 7), (6, 6)]
+    }
     for (i, j) in [(0, 0), (0, 7), (7, 0), (7, 7)]:
         if state.board[i][j] == None:
-            for el in cornerDict[(i,j)]:
+            for el in cornerDict[(i, j)]:
                 (i1, j1) = el
                 if state.board[i1][j1] == player:
                     res += 1
+                if (i1 == 1 or i1 == 6) and (j1 == 1 or j1 == 6):
+                    res += 1
     return res
-
 
 
 def heuristic_value(state, player):
@@ -193,10 +194,10 @@ def heuristic_value(state, player):
     corners_neighbourhood = corners_neighbours(state, player) \
         - corners_neighbours(state, 1-player)
 
-    res += 200 * corners_captured \
-        + 20 * mobility \
-        - 150 * corners_neighbourhood \
-        + 20 * ending
+    res += 10 * corners_captured \
+        + 1 * mobility \
+        - 5 * corners_neighbourhood \
+        + 1 * ending
     return res
 
 
@@ -217,7 +218,7 @@ def playGame(player, B):
 
 
 defs = 0
-tries = 1000
+tries = 10000
 start_time = time.time()
 for i in range(1, tries+1):
     player = 0
