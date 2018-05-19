@@ -26,7 +26,7 @@ class Board:
     def __init__(self):
         self.board = initial_board()
         self.fields = set()
-        self.move_list = []
+        self.last_moves = ("nothing", "nothing")
         self.revNum = [2, 2]
         for i in range(M):
             for j in range(M):
@@ -74,7 +74,7 @@ class Board:
         return None
 
     def do_move(self, move, player):
-        self.move_list.append(move)
+        self.last_moves = (self.last_moves[1], move)
         # print move
         if move == [None] or move == None:
             return
@@ -105,9 +105,7 @@ class Board:
     def terminal(self):
         if not self.fields:
             return True
-        if len(self.move_list) < 2:
-            return False
-        return self.move_list[-1] == self.move_list[-2] == [None]
+        return self.last_moves[1] == self.last_moves[0] == [None]
 
     def random_move(self, player):
         ms = self.moves(player)
@@ -132,12 +130,48 @@ class Board:
         if ms and ms != [None]:
             res = []
             for move in ms:
-                res.append((val(nextS(self, move, player), 1-player), move))
+                res.append((val(nextS(self, move, player), player), move))
 
             def max_fn(value): return value[0]
             return max(res, key=max_fn)[1]
         return [None]
 
+    def alfabetamove(self, player, depth):
+        ms = self.moves(player)
+        # print ms
+        if ms and ms != [None]:
+            res = []
+            for move in ms:
+                res.append((alphabeta(nextS(self, move, player),depth, -float('Inf'), float('Inf'), 1-player), move))
+
+            def max_fn(value): return value[0]
+            return max(res, key=max_fn)[1]
+        return [None]
+
+def alphabeta(state, depth, alpha, beta, player):
+    if state.terminal():
+        return float("Inf")
+    if depth == 0:
+        return heuristic_value(state,1-player)
+
+    if player:
+        v = -float("Inf")
+        for m in state.moves(player):
+            child = nextS(state,m,player)
+            v = max(v, alphabeta(child, depth - 1, alpha, beta, 1-player))
+            alpha = max(alpha, v)
+            if beta <= alpha:
+                break 
+        return v
+    else:
+        v = float("Inf")
+        for m in state.moves(player):
+            child = nextS(state,m,player)
+            v = min(v, alphabeta(child, depth - 1, alpha, beta, player))
+            beta = min(beta, v)
+            if beta <= alpha:
+                break
+        return v
 
 def nextS(state, move, player):
     nextS = copy.deepcopy(state)
@@ -147,8 +181,8 @@ def nextS(state, move, player):
 
 def val(current_state, player):
     if current_state.terminal():
-        return current_state.result()
-    return heuristic_value(current_state, 1-player)
+        return float("Inf")
+    return heuristic_value(current_state, player)
 
 
 def corners(state, player):
@@ -179,6 +213,8 @@ def corners_neighbours(state, player):
 
 
 def heuristic_value(state, player):
+    if state.terminal():
+        return state.result()*float("Inf")
     res = 0
     coin_parity = float(state.result()) / \
         sum(state.revNum)  # procent pionków
@@ -206,7 +242,8 @@ def playGame(player, B):
         if not player:
             m = B.random_move(player)
         else:
-            m = B.heuristicMove(player)
+            m = B.alfabetamove(player=player,depth=1)
+            # m = B.heuristicMove(player=player)
         # print m
         if m and m != None:
             B.do_move(m, player)
