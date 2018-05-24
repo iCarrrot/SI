@@ -1,3 +1,4 @@
+# coding=utf-8
 import random
 import sys
 from collections import defaultdict as dd
@@ -11,11 +12,11 @@ M = 8
 
 
 def initial_board():
-    B = [[None] * M for _ in range(M)]
+    B = [[0] * M for _ in range(M)]
     B[3][3] = 1
     B[4][4] = 1
-    B[3][4] = 0
-    B[4][3] = 0
+    B[3][4] = -1
+    B[4][3] = -1
     return B
 
 
@@ -27,32 +28,51 @@ class Board:
         self.board = initial_board()
         self.fields = set()
         self.last_moves = ("nothing", "nothing")
-        self.revNum = [2, 2]
+        self.revNum = {-1:2, 1:2}
         for i in range(M):
             for j in range(M):
-                if self.board[i][j] == None:
+                if self.board[i][j] == 0:
                     self.fields.add((j, i))
 
-    def draw(self):
-        for i in range(M):
-            res = []
-            for j in range(M):
-                b = self.board[i][j]
-                # print b
-                if b == None:
-                    res.append('.')
-                elif b == 1:
-                    res.append('#')
-                else:
-                    res.append('o')
-            print ''.join(res)
-        print
+    def draw(self, validator = 0):
+        if validator:
+            for i in range(M):
+                res = []
+                for j in range(M):
+                    b = self.board[i][j]
+                    # print b
+                    if b == 0:
+                        res.append('.')
+                    elif b == 1:
+                        res.append('X')
+                    else:
+                        res.append('O')
+                sys.stderr.write( ''.join(res))
+                sys.stderr.write( "\n")
+            sys.stderr.write( "\n")
+        else:
+            for i in range(M):
+                res = []
+                for j in range(M):
+                    b = self.board[i][j]
+                    # print b
+                    if b == 0:
+                        res.append('.')
+                    elif b == 1:
+                        res.append('#')
+                    else:
+                        res.append('o')
+                print ''.join(res)
+            print
+        
 
     def moves(self, player):
         res = []
+
         for (x, y) in self.fields:
             if any(self.can_beat(x, y, direction, player) for direction in Board.dirs):
                 res.append((x, y))
+            # print any(self.can_beat(x, y, direction, player) for direction in Board.dirs)
         if not res:
             return [None]
         return res
@@ -62,7 +82,8 @@ class Board:
         x += dx
         y += dy
         cnt = 0
-        while  0 <= x < M and 0 <= y < M and self.board[y][x] == 1-player:
+        # print self.board
+        while  0 <= x < M and 0 <= y < M and self.board[y][x] == -player:
             x += dx
             y += dy
             cnt += 1
@@ -83,7 +104,7 @@ class Board:
             to_beat = []
             x += dx
             y += dy
-            while  0 <= x < M and 0 <= y < M and self.board[y][x] == 1-player :
+            while  0 <= x < M and 0 <= y < M and self.board[y][x] == -player :
                 to_beat.append((x, y))
                 x += dx
                 y += dy
@@ -91,10 +112,10 @@ class Board:
                 for (nx, ny) in to_beat:
                     self.board[ny][nx] = player
                     self.revNum[player] += 1
-                    self.revNum[1-player] -= 1
+                    self.revNum[-player] -= 1
 
     def result(self):
-        return self.revNum[1] - self.revNum[0]
+        return self.revNum[1] - self.revNum[-1]
 
     def terminal(self):
         if not self.fields:
@@ -103,33 +124,36 @@ class Board:
 
     def random_move(self, player):
         ms = self.moves(player)
+        # print ms
         if ms and ms != [None]:
             return random.choice(ms)
         return [None]
 
-    def alfabetamove(self, player, depth):
+    def alfabetamove(self, player, depth, my_player):
         ms = self.moves(player)
         # print ms
         if ms and ms != [None]:
             res = []
             for move in ms:
-                res.append((alphabeta(nextS(self, move, player),depth, -float('Inf'), float('Inf'), 1-player), move))
-
+                res.append((alphabeta(nextS(self, move, player),depth, -float('Inf'), float('Inf'), -player, my_player), move))
+            # self.draw()
+            # print res
             def max_fn(value): return value[0]
+            # print max(res, key=max_fn)[1]
             return max(res, key=max_fn)[1]
         return [None]
 
-def alphabeta(state, depth, alpha, beta, player):
+def alphabeta(state, depth, alpha, beta, player, my_player):
     if state.terminal():
         return float("Inf")
     if depth == 0:
-        return heuristic_value(state,1-player)
+        return heuristic_value(state,-player)
 
-    if player:
+    if player==my_player:
         v = -float("Inf")
         for m in state.moves(player):
             child = nextS(state,m,player)
-            v = max(v, alphabeta(child, depth - 1, alpha, beta, 1-player))
+            v = max(v, alphabeta(child, depth - 1, alpha, beta, -player, my_player))
             alpha = max(alpha, v)
             if beta <= alpha:
                 break 
@@ -138,7 +162,7 @@ def alphabeta(state, depth, alpha, beta, player):
         v = float("Inf")
         for m in state.moves(player):
             child = nextS(state,m,player)
-            v = min(v, alphabeta(child, depth - 1, alpha, beta, player))
+            v = min(v, alphabeta(child, depth - 1, alpha, beta, player, my_player))
             beta = min(beta, v)
             if beta <= alpha:
                 break
@@ -167,7 +191,7 @@ def corners_neighbours(state, player):
         (7, 7): [(7, 6), (6, 7), (6, 6)]
     }
     for (i, j) in [(0, 0), (0, 7), (7, 0), (7, 7)]:
-        if state.board[i][j] == None:
+        if state.board[i][j] == 0:
             for el in cornerDict[(i, j)]:
                 (i1, j1) = el
                 if state.board[i1][j1] == player:
@@ -179,57 +203,62 @@ def corners_neighbours(state, player):
 
 def heuristic_value(state, player):
     if state.terminal():
-        return state.result()*float("Inf")
+        return player * state.result()*float("Inf")
     res = 0
-    coin_parity = float(state.result()) / \
-        sum(state.revNum)  # procent pionków
+    coin_parity = float(player  *state.result()) / \
+        (state.revNum[1]+state.revNum[-1]) # procent pionków
 
-    ending = (sum(state.revNum) > 55) * coin_parity
+    ending = ((state.revNum[1]+state.revNum[-1])> 55) * coin_parity
 
     corners_captured = corners(state, player) \
-        - corners(state, 1-player)
+        - corners(state, -player)
 
     mobility = len(state.moves(player)) \
-        - len(state.moves(1-player))
+        - len(state.moves(-player))
 
     corners_neighbourhood = corners_neighbours(state, player) \
-        - corners_neighbours(state, 1-player)
-
+        - corners_neighbours(state, -player)
+    
     res += 10 * corners_captured \
         + 1 * mobility \
         - 5 * corners_neighbourhood \
         + 1 * ending
+    # state.draw()
+    # print "heura: ", res, corners_captured, mobility, corners_neighbourhood, ending, "\n\n"
     return res
 
 
-def playGame(player, B):
+def playGame(player, B, my_player):
     while True:
-        if not player:
+        if player!=my_player:
             m = B.random_move(player)
         else:
-            m = B.alfabetamove(player=player,depth=1)
-
+            m = B.alfabetamove(player=player,depth=0, my_player=my_player)
+            # m = B.random_move(player)
+            
+        # print m
         if m and m != None:
             B.do_move(m, player)
-        player = 1-player
+        player = -player
+        # B.draw(1)
         if B.terminal():
             break
 
-
 defs = 0
-tries = 10000
+tries = 1000
 start_time = time.time()
+my_player = 1
 for i in range(1, tries+1):
-    player = 0
+    player = -1
     B = Board()
-    playGame(player=player, B=B)
+    playGame(player=player, B=B, my_player=my_player)
     r = B.result()
 
     if r < 0:
         defs += 1
 
-    if not i % 5:
+    if not i % 10:
         print i, ': Result', r, defs
         print("--- %s seconds ---" % (time.time() - start_time))
 
-print 100 - 100.*defs/tries, "% wygranych"
+# print 100 - 100.*defs/tries, "% wygranych"
