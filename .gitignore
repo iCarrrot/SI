@@ -124,7 +124,9 @@ solution.pl
 proof
 arleta*
 nimcache
-test*
-chars_test1
+test
+test.nim
 reversi
 cars
+*learning_data
+chars_test*
