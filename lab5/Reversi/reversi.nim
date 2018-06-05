@@ -8,12 +8,26 @@ const
     M = 8'i8
     DIRS = [(0'i8, 1'i8), (1'i8, 0'i8), (-1'i8, 0'i8), (0'i8, -1'i8),(1'i8, 1'i8), (-1'i8, -1'i8), (1'i8, -1'i8), (-1'i8, 1'i8)]
     DEPTH = 0
+    TRIES = 1
 type
     row = array[0'i8..M-1, int8]
     boardT = array[0'i8..M-1, row]
     moveT = tuple[x,y:int8]
     playerT = int8
-
+    Board =  ref object of RootObj
+        board: boardT
+        last_moves : tuple[l1,l2:moveT]
+        revNum : tuple[p0,p1:int8]
+    Node[T] = ref TNode[T]
+    TNode[T] = object
+      data: T
+      parent: Node[T]
+      children: seq[Node[T]]
+    Wins = array[-1..1, int]
+    Color = range[-1..1]
+    Mcts = object
+        wins: Wins
+        state: Board
 
 proc initial_board(): boardT =
     var B : boardT
@@ -27,26 +41,21 @@ proc initial_board(): boardT =
     return B
 
 
-type
-    Board =  ref object of RootObj
-        board: boardT
-        last_moves : tuple[l1,l2:moveT]
-        revNum : tuple[p0,p1:int8]
-    
 
-method init(this: Board) = 
+
+method init(this: Board){.base.} = 
     this.board = initial_board()
     this.last_moves = ((-100'i8,-100'i8),(-100'i8,-100'i8))
     this.revNum = (2'i8, 2'i8)
 
-method copy(this:Board, that:Board) =
+method copy(this:Board, that:Board) {.base.} =
     this.board = that.board
     this.last_moves = that.last_moves
     this.revNum = that.revNum
 
 
 
-method can_beat(self:Board, gx:int8, gy:int8, d:moveT, player:playerT):bool =
+method can_beat(self:Board, gx:int8, gy:int8, d:moveT, player:playerT):bool {.base.} =
     var 
         dx,dy:int8
         cnt: int8
@@ -75,8 +84,9 @@ iterator moves(self:Board, player:playerT):moveT=
                 if check>0:
                     var a:moveT = (x,y)
                     yield a
+            
 
-method do_move(self:Board, move:moveT, player:playerT) =
+method do_move(self:Board, move:moveT, player:playerT){.base.} =
     self.last_moves = (self.last_moves.l2, move)
     # print move
     if move != (-1'i8,-1'i8):
@@ -115,16 +125,16 @@ method do_move(self:Board, move:moveT, player:playerT) =
                             self.revNum.p1 -= 1
                             self.revNum.p0 += 1
                             
-method result(self:Board):int8 = 
+method result(self:Board):int8 {.base.} = 
     return self.revNum.p1 - self.revNum.p0
 
-method terminal(self:Board):bool = 
+method terminal(self:Board):bool {.base.}= 
     if self.revNum.p0+self.revNum.p1 == 64:
         return true
     
     return self.last_moves[1] == self.last_moves[0] and self.last_moves[1] == (-1'i8,-1'i8)
 
-method random_move(self:Board, player:playerT):moveT=
+method random_move(self:Board, player:playerT):moveT {.base.}=
     var moves: seq[moveT] = @[]
     for s in self.moves(player):
       moves.add(s)
@@ -230,7 +240,7 @@ proc alphabeta(state:Board, depth:int8, alpha:float, beta:float, player:playerT,
                 break
         return v
 
-method alphabetamove(self:Board, player:playerT, depth:int8, my_player:playerT):moveT = 
+method alphabetamove(self:Board, player:playerT, depth:int8, my_player:playerT):moveT{.base.} = 
     var 
     # print ms
         bestM:moveT = (-1'i8,-1'i8)
@@ -248,35 +258,56 @@ method alphabetamove(self:Board, player:playerT, depth:int8, my_player:playerT):
 
 
 
+proc playGame(gplayer:playerT, B:Board, my_player:playerT, random:bool)
 
-proc playGame(gplayer:playerT, B:Board, my_player:playerT)=
+method mctsMove(self:Board, player:playerT, tries:int,my_player:playerT):moveT{.base.}=
+    var 
+        node = Node[Mcts](data: Mcts(wins: [0,0,0],state: self), parent: nil, children: nil)
+        move: moveT
+
+    
+    playGame(player,node.data.state, my_player, true)
+    echo 1
+    
+    if node.data.state.result()*my_player > 0:
+        node.data.wins[my_player] = 1
+        node.data.wins[0] = 1
+        node.data.wins[-my_player] = 0
+    else:
+        node.data.wins[my_player] = 0
+        node.data.wins[0] = 1
+        node.data.wins[-my_player] = 1
+    
+    echo node.data.state.result()
+    echo self.result()
+
+
+    return move
+        
+proc playGame(gplayer:playerT, B:Board, my_player:playerT, random:bool)=
     var player = gplayer
     randomize()
     while true:
-        # echo "1"
         var m:moveT
-        if player!=my_player:
-            # echo "3"
+        if player!=my_player or random:
             m = B.random_move(player)
-            # echo "4"
         else:
-            # echo "5"
-            m = B.alphabetamove(player,DEPTH, my_player)
-            # echo "6"
-            # m = B.random_move(player)
-        # print m
-        # echo "1"
+            m = B.mctsMove(player,TRIES, my_player)
+            # m = B.alphabetamove(player,DEPTH, my_player)
+            break
         B.do_move(m, player)
         player = -player
-        # B.draw(1)
         if B.terminal():
-            break
-        # echo m
+            break        
+
+
+
+
 
 
 var 
     defs:float = 0
-    tries = 1000
+    tries = 1
     start_time = cpuTime()
     my_player = 1'i8
     player = -1'i8
@@ -286,7 +317,7 @@ for i in 1..tries+1:
     # echo "1"
     B = Board()
     B.init()
-    playGame(player, B, my_player)
+    playGame(player, B, my_player, false)
     var r = B.result()
     # echo r
     if r < 0:

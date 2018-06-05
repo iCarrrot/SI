@@ -4,12 +4,23 @@ import sys
 from collections import defaultdict as dd
 import copy
 import time
+from sklearn.neural_network import MLPClassifier
+
+import pickle
+
+with open('../NN/nn_weights_bigger_more.dat') as f:
+    nn = pickle.load(f)
 
 BOK = 30
 SX = -100
 SY = 0
 M = 8
 
+def boardToTab(board):
+    res = []
+    for y in board:
+        res+=y
+    return res
 
 def initial_board():
     B = [[0] * M for _ in range(M)]
@@ -18,7 +29,64 @@ def initial_board():
     B[3][4] = -1
     B[4][3] = -1
     return B
+def addAtributes(data):
+    res = []
+    #suma
+    res.append(sum(data))
+    #rogi
+    corners1=0
+    corners2=0
+    for (i, j) in [(0, 0), (0, 7), (7, 0), (7, 7)]:
+        if data[i*8+j] == 1:
+            corners1 += 1
+        if data[i*8+j] == -1:
+            corners2 += 1
+    res.append(corners1) 
+    res.append(corners2)
 
+    # sąsiedzi rogów
+    
+    cornerDict = {
+        (0, 0): [(1, 0), (0, 1), (1, 1)],
+        (0, 7): [(1, 7), (0, 6), (1, 6)],
+        (7, 0): [(7, 1), (6, 0), (6, 1)],
+        (7, 7): [(7, 6), (6, 7), (6, 6)]
+    }
+    corners_n1 = 0
+    corners_n2 = 0
+    for (i, j) in [(0, 0), (0, 7), (7, 0), (7, 7)]:
+        if data[i*8+j] == 0:
+            for el in cornerDict[(i, j)]:
+                (i1, j1) = el
+                if data[i1*8+j1] == 1:
+                    corners_n1 += 1
+                    if (i1 == 1 or i1 == 6) and (j1 == 1 or j1 == 6):
+                        corners_n1 += 1
+                if data[i1*8+j1] == -1:
+                    corners_n2 += 1
+                    if (i1 == 1 or i1 == 6) and (j1 == 1 or j1 == 6):
+                        corners_n2 += 1
+
+    res.append(corners_n1)
+    res.append(corners_n2)
+
+    edge1,edge2 = 0,0
+    edge_n1, edge_n2 = 0,0
+    for i in range(64):
+        x,y = i//8, i%8
+        if ((x ==1 or x ==6 ) and 1<=y<=6) or  (( y == 1 or y ==6) and 1<=x<=6):
+            if data[i] == 1:
+                edge1+=1
+            if data[i] ==-1:
+                edge2+=1
+
+        if ((x ==2 or x ==5 ) and 2<=y<=5) or  (( y == 2 or y ==5) and 2<=x<=5):
+            if data[i] == 1:
+                edge_n1+=1
+            if data[i] ==-1:
+                edge_n2+=1
+    res+=[edge1,edge2,edge_n1,edge_n2]
+    return res+data
 
 class Board:
     dirs = [(0, 1), (1, 0), (-1, 0), (0, -1),
@@ -143,6 +211,34 @@ class Board:
             return max(res, key=max_fn)[1]
         return [None]
 
+    def NNMove(self, player):
+        ms = self.moves(player)
+        # print ms
+        if ms and ms != [None]:
+            res = []
+            for move in ms:
+                res.append((val(nextS(self, move, player), player), move))
+
+            def max_fn(value): return value[0]
+            return max(res, key=max_fn)[1]
+        return [None]
+
+
+def val(current_state, player):
+    if current_state.terminal():
+        return float("Inf")
+    return NN_value(current_state, player)
+
+def NN_value(state, player):
+    ys = nn.predict_proba([addAtributes(boardToTab(state.board))])
+    prob_1 = ys[0][0]
+    prob1 = ys[0][1]
+    if player ==1:
+        return prob1
+    return prob_1
+
+
+
 def alphabeta(state, depth, alpha, beta, player, my_player):
     if state.terminal():
         return float("Inf")
@@ -233,7 +329,8 @@ def playGame(player, B, my_player):
         if player!=my_player:
             m = B.random_move(player)
         else:
-            m = B.alfabetamove(player=player,depth=0, my_player=my_player)
+            # m = B.alfabetamove(player=player,depth=0, my_player=my_player)
+            m = B.NNMove(player=player)
             # m = B.random_move(player)
             
         # print m

@@ -6,15 +6,15 @@ const
     # X = 34
     # TRIES = 80
 
-    #z2 & z6
-    # Y = 21
-    # X = 78
-    # TRIES = 800
+    # z2 & z6
+    Y = 21
+    X = 78
+    TRIES = 800
 
     #z3
-    Y = 6
-    X = 12
-    TRIES = 80
+    # Y = 6
+    # X = 12
+    # TRIES = 80
 
     #z8 & z9
     # Y = 17
@@ -54,16 +54,8 @@ proc newState(x:int, y:int, vx:int, vy:int, dx:int8, dy:int8):tuple[nx,ny,nVx,nV
             nVy = 0
 
         var nx:int = x + nVx - 3
-        # if nx > X:
-        #     nx = X
-        # if nx < 0:
-        #     nx = 0
         var ny:int = y + nVy - 3
-        # if ny > Y:
-        #     ny = Y
-        # if ny < 0:
-        #     ny = 0
-               
+
         return ((int8)nx,(int8)ny,(int8)nVx,(int8)nVy)
 
 # proc printBoard()
@@ -91,17 +83,14 @@ for tr in 1..TRIES:
         for x in 0..X:
             for vy in 0..6:
                 for vx in 0..6:
-                    # echo table[y][x]
                     if fildChar(table[y][x]):
-                        # echo table[y][x]
-                        var 
-                            maxValue:dataTuple = (0'i8,0'i8,low(float))
+                        var maxValue:dataTuple = (0'i8,0'i8,low(float))
                         for dy in -1'i8..1'i8:
                             for dx in -1'i8..1'i8:
                                 # echo dy, " ", dx
-                                var value:float =0
-                                
-                                var nx, ny, nVx, nVy:int8
+                                var 
+                                    value:float =0
+                                    nx, ny, nVx, nVy:int8
                                 if table[y][x] != 'o':
                                     (nx, ny, nVx, nVy) = newState(x,y,vx,vy,dx,dy)                                
                                     if nx<0 or nx>X or ny<0 or ny>Y:
@@ -117,11 +106,8 @@ for tr in 1..TRIES:
                                             else:
                                                 value += REWARD + GAMMA * board[tr-1][ny][nx][nVy][nVx].val
                                     value = value/9                                        
-                                               
-                                # echo value, " ", maxValue.val
                                 if value > maxValue.val:
                                     maxValue = (dx,dy, value)
-                        
                         board[tr][y][x][vy][vx] = maxValue
                     else:
                         board[tr][y][x][vy][vx] = board[tr-1][y][x][vy][vx]

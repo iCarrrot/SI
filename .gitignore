@@ -130,3 +130,5 @@ reversi
 cars
 *learning_data
 chars_test*
+nn_weights*
+
