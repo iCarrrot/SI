@@ -369,13 +369,14 @@ while True:
 
         if move[0] >= 0 and move[1] >= 0:
             fig = B.get(move[0], move[1])
+            # print move, fig
             move = (fig, move[2], move[3])
-            B.do_move(move, 1-my_player, my_player)
+            B.do_move(move, 1-my_player, 1-my_player)
 
-        m = betterAgent(B, my_player, my_player)
+        m = betterAgent(B, my_player, 1-my_player)
         if m and m != [None]:
             figCoords = B.animalsCoords[m[0]]
-            B.do_move(m, my_player, my_player)
+            B.do_move(m, my_player, 1-my_player)
             
             print "IDO", figCoords[0], figCoords[1], m[1], m[2]
         else:
@@ -385,10 +386,10 @@ while True:
         if my_player == -1:
             my_player = 0
 
-        m = betterAgent(B, my_player, my_player)
+        m = betterAgent(B, my_player, 1-my_player)
         if m and m != [None]:
             figCoords = B.animalsCoords[m[0]]
-            B.do_move(m, my_player, my_player)
+            B.do_move(m, my_player, 1-my_player)
             
             # print figCoords, m
             print "IDO", figCoords[0], figCoords[1], m[1], m[2]
