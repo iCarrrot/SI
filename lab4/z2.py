@@ -17,7 +17,7 @@ water = {
 }
 
 traps = {(2, 0), (4, 0), (3, 1), (2, 8), (4, 8), (3, 7)}
-goal = {0: (3, 0), 1: (3, 8)}
+goal = {0: (3, 8), 1: (3, 0)}
 animalSet = {"L", "T", "D", "C", "R", "J", "W", "E"}
 animalDict = {"R": 1, "C": 2, "D": 3, "W": 4, "J": 5, "T": 6, "L": 7, "E": 8}
 reverseAnimalDict = {1: "R", 2: "C", 3: "D",
@@ -276,6 +276,7 @@ def randomAgent(board, player, LEN, first_player):
 
 
 def heuristic(board, player, first_player):
+    #TODO heurystyka wchodzi do własnej jamy
     value = 0
     minTax = 10000
     for c in animalSet:
