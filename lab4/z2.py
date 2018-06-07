@@ -390,7 +390,7 @@ while True:
             figCoords = B.animalsCoords[m[0]]
             B.do_move(m, my_player, my_player)
             
-            print figCoords, m
+            # print figCoords, m
             print "IDO", figCoords[0], figCoords[1], m[1], m[2]
         else:
             print "IDO -1 -1 -1 -1"
