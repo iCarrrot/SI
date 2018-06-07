@@ -346,7 +346,7 @@ while true:
 
         m = B.alphabetamove(my_player,DEPTH, my_player)
         B.do_move(m, my_player)
-        echo "IDO", m[0], m[1]
+        echo "IDO $1 $2" % [$m[0], $m[1]]
         
     elif cmd == "UGO":
         if my_player == 0'i8:
@@ -354,7 +354,7 @@ while true:
 
         m = B.alphabetamove(my_player,DEPTH, my_player)
         B.do_move(m, my_player)
-        echo "IDO", m[0], m[1]
+        echo "IDO $1 $2" % [$m[0], $m[1]]
     elif cmd == "ONEMORE":
         B=Board()
         my_player = 0'i8
