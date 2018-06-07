@@ -28,7 +28,7 @@ reverseAnimalDict = {1: "R", 2: "C", 3: "D",
 
 
 def change(fig, player, my_player):
-    x = fig.upper() if player ==my_player else fig.lower()
+    x = fig.upper() if player == my_player else fig.lower()
     return x
 
 
@@ -107,8 +107,8 @@ class Board:
                 b = self.board[i][j]
                 res.append(b)
 
-            print ''.join(res)
-        print
+            # print ''.join(res)
+        # print
 
     def moves(self, player, my_player):
         res = []
@@ -148,10 +148,11 @@ class Board:
                     moves += [(change(typ, player, my_player), x1, y1)]
 
                 elif fig.isalpha() \
-                        and ((player==my_player and not fig.istitle()) or (not player==my_player and fig.istitle())) \
+                        and ((player == my_player and not fig.istitle()) or (not player == my_player and fig.istitle())) \
                         and (x, y) not in water \
                         and (typ == "R" or (x1, y1) not in water):
-                    moves += self.can_beat(typ, fig, (x1, y1), player, my_player)
+                    moves += self.can_beat(typ, fig,
+                                           (x1, y1), player, my_player)
         return moves
 
     def can_beat(self, fig1, fig2, coords, player, my_player):
@@ -170,7 +171,7 @@ class Board:
                 or (fig1.upper() == 'R' and fig2.upper() == 'E')\
                 or animalDict[fig1.upper()] >= animalDict[fig2.upper()]:
             # print fig1, animalDict[fig1.upper()], fig2, animalDict[fig2.upper()]
-            return [(change(fig1, player,my_player), x, y)]
+            return [(change(fig1, player, my_player), x, y)]
         return []
 
     def get(self, x, y):
@@ -186,7 +187,7 @@ class Board:
             return
         fig, x, y = move
         lastX, lastY = self.animalsCoords[fig]
-        print self.animalsCoords
+        # print self.animalsCoords
         # if lastX ==None or lastY == None:
 
         #     print fig, x,y,lastX, lastY, self.animalsCoords
@@ -248,9 +249,9 @@ class Board:
 def randomPlay(board, player):
     steps = 0
     while True:
-        m = board.random_move(player,my_player)
-        board.do_move(m, player,my_player)
-        res, wp = board.result(player,my_player)
+        m = board.random_move(player, my_player)
+        board.do_move(m, player, my_player)
+        res, wp = board.result(player, my_player)
         steps += 1
         if res:
             return wp, steps
@@ -278,17 +279,17 @@ def heuristic(board, player, my_player):
     value = 0
     minTax = 10000
     for c in animalSet:
-        #suma po zwierzętach, a potem (10-min(tax) )*4
-        c = c if player ==my_player else c.lower()
-        c1 = change(c,1-player, my_player)
+        # suma po zwierzętach, a potem (10-min(tax) )*4
+        c = c if player == my_player else c.lower()
+        c1 = change(c, 1-player, my_player)
         # print c, c1
         (x, y) = board.animalsCoords[c]
-        (x1, y1) =  board.animalsCoords[c1]
-        if x!= None and y!= None:
-            value+=animalDict[c.upper()]
-        if x1!= None and y1!= None:
-            value-=animalDict[c1.upper()]
-            
+        (x1, y1) = board.animalsCoords[c1]
+        if x != None and y != None:
+            value += animalDict[c.upper()]
+        if x1 != None and y1 != None:
+            value -= animalDict[c1.upper()]
+
         if x != None and y != None:
             dist = abs(goal[player][0] - x) + abs(goal[player][1] - y)
             # dist1 = abs(goal[1-player][0] - x1) + abs(goal[1-player][1] - y1)
@@ -296,14 +297,14 @@ def heuristic(board, player, my_player):
             # value += dist*(10-animalDict[c.upper()])
             if dist < minTax:
                 minTax = dist
-    value+=(10-minTax)*4
+    value += (10-minTax)*4
     # print value
-    
+
     return value
 
 
 def betterAgent(board, player, my_player):
-    moves = board.moves(player,my_player)
+    moves = board.moves(player, my_player)
     results = {i: 0 for i in range(len(moves))}
     for i in range(len(moves)):
         newboard = Board(fromBoard=board, empty=False)
@@ -318,80 +319,87 @@ def betterAgent(board, player, my_player):
 
 winner = 0
 tries = 10
-my_player =1
-for _ in range(tries):
-    player = 0
-    B = Board()
+my_player = -1
+B = Board()
+games =0
+# for _ in range(tries):
+#     my_player = 1
+#     player = 0
+#     B = Board()
 
-    while True:
-        # B.draw()
-        if not (player == my_player):
-            m = randomAgent(B, player, 2000, my_player)
+#     while True:
+#         # B.draw()
+#         if not (player == my_player):
+#             m = randomAgent(B, player, 2000, my_player)
+#         else:
+#             # m = B.random_move(player)
+#             m = betterAgent(B, player, my_player)
+#         if m == None:
+#             wp = 1-player
+#             break
+
+#         print m, B.pacifistMoves
+#         # raw_input()
+#         B.do_move(m, player, my_player)
+
+#         res, wp = B.result(player, my_player)
+#         if res:
+#             break
+#         player = 1-player
+
+#         # raw_input()
+#         # if B.terminal():
+#         #     break
+
+#     winner += 1 if wp == my_player else 0
+#     B.draw()
+#     my_player = 1-my_player
+#     print 'player ', int(wp == 1-my_player), ' won '
+# print winner*100. / tries, "%"
+# # raw_input('Game over!')
+
+print "RDY"
+while True:
+    line = sys.stdin.readline().split()
+    cmd, args = line[0], line[1:]
+    if cmd == "HEDID":
+        if my_player == -1:
+            my_player = 1
+        move = tuple(int(x) for x in args[2:])
+
+        if move[0] >= 0 and move[1] >= 0:
+            fig = B.get(move[0], move[1])
+            move = (fig, move[2], move[3])
+            B.do_move(move, 1-my_player, my_player)
+
+        m = betterAgent(B, my_player, my_player)
+        if m and m != [None]:
+            B.do_move(m, my_player, my_player)
+            figCoords = B.animalsCoords[m[0]]
+            print "IDO", figCoords[0], figCoords[1], m[1], m[2]
         else:
-            # m = B.random_move(player)
-            m = betterAgent(B, player, my_player)
-        if m == None:
-            wp = 1-player
-            break
+            print "IDO -1 -1 -1 -1"
 
-        
-        # print m, B.pacifistMoves
-        # raw_input()
-        B.do_move(m, player, my_player)
+    elif cmd == "UGO":
+        if my_player == -1:
+            my_player = 0
 
-        res, wp = B.result(player, my_player)
-        if res:
-            break
-        player = 1-player
+        m = betterAgent(B, my_player, my_player)
+        if m and m != [None]:
+            B.do_move(m, my_player, my_player)
+            figCoords = B.animalsCoords[m[0]]
+            print "IDO", figCoords[0], figCoords[1], m[1], m[2]
+        else:
+            print "IDO -1 -1 -1 -1"
+    elif cmd == "ONEMORE":
+        B = Board()
+        my_player = -1
+        games += 1
+        sys.stderr.write(str(games)+"\n")
 
-        # raw_input()
-        # if B.terminal():
-        #     break
+        print "RDY"
+    elif cmd == "BYE":
+        break
+    # B.draw()
 
-    winner += 1 if wp == my_player else 0
-    B.draw()
-    my_player=1-my_player
-    print 'player ', int(wp==1-my_player), ' won '
-print winner*100. / tries, "%"
-# raw_input('Game over!')
-
-# print "RDY"
-# while True:
-#     line = sys.stdin.readline().split()
-#     cmd, args = line[0], line[1:]
-#     if cmd == "HEDID":
-#         if my_player == -1:
-#             my_player = 1
-#         move = tuple(int(x) for x in args[2:])
-#         if move[0] >=0 and move[1]>=0:
-#             B.do_move(move,1-my_player)
-
-#         m = B.alfabetamove(my_player,depth, my_player)
-#         if m and m!= [None]:
-#             B.do_move(m, my_player)
-#             print "IDO", m[0], m[1]
-#         else:
-#             print "IDO -1 -1"
-        
-#     elif cmd == "UGO":
-#         if my_player ==0:
-#             my_player = -1
-
-#         m = B.alfabetamove(my_player,depth, my_player)
-#         if m and m!= [None]:
-#             B.do_move(m, my_player)
-#             print "IDO", m[0], m[1]
-#         else:
-#             print "IDO -1 -1"
-#     elif cmd == "ONEMORE":
-#         B=Board()
-#         my_player = 0
-#         games+=1
-#         sys.stderr.write(str(games)+"\n")
-        
-#         print "RDY"
-#     elif cmd == "BYE":
-#         break
-#     # B.draw()
-
-sys.exit(0)
+# sys.exit(0)
