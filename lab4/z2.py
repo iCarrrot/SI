@@ -374,8 +374,9 @@ while True:
 
         m = betterAgent(B, my_player, my_player)
         if m and m != [None]:
-            B.do_move(m, my_player, my_player)
             figCoords = B.animalsCoords[m[0]]
+            B.do_move(m, my_player, my_player)
+            
             print "IDO", figCoords[0], figCoords[1], m[1], m[2]
         else:
             print "IDO -1 -1 -1 -1"
@@ -386,8 +387,10 @@ while True:
 
         m = betterAgent(B, my_player, my_player)
         if m and m != [None]:
-            B.do_move(m, my_player, my_player)
             figCoords = B.animalsCoords[m[0]]
+            B.do_move(m, my_player, my_player)
+            
+            print figCoords, m
             print "IDO", figCoords[0], figCoords[1], m[1], m[2]
         else:
             print "IDO -1 -1 -1 -1"
