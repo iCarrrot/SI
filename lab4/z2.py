@@ -186,6 +186,7 @@ class Board:
             return
         fig, x, y = move
         lastX, lastY = self.animalsCoords[fig]
+        print self.animalsCoords
         # if lastX ==None or lastY == None:
 
         #     print fig, x,y,lastX, lastY, self.animalsCoords
@@ -332,6 +333,8 @@ for _ in range(tries):
         if m == None:
             wp = 1-player
             break
+
+        
         # print m, B.pacifistMoves
         # raw_input()
         B.do_move(m, player, my_player)
@@ -357,11 +360,11 @@ print winner*100. / tries, "%"
 #     line = sys.stdin.readline().split()
 #     cmd, args = line[0], line[1:]
 #     if cmd == "HEDID":
-#         if my_player == 0:
+#         if my_player == -1:
 #             my_player = 1
 #         move = tuple(int(x) for x in args[2:])
 #         if move[0] >=0 and move[1]>=0:
-#             B.do_move(move,-my_player)
+#             B.do_move(move,1-my_player)
 
 #         m = B.alfabetamove(my_player,depth, my_player)
 #         if m and m!= [None]:

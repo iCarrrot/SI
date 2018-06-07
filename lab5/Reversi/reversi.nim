@@ -7,8 +7,8 @@ import os
 const
     M = 8'i8
     DIRS = [(0'i8, 1'i8), (1'i8, 0'i8), (-1'i8, 0'i8), (0'i8, -1'i8),(1'i8, 1'i8), (-1'i8, -1'i8), (1'i8, -1'i8), (-1'i8, 1'i8)]
-    DEPTH = 0
-    TRIES = 1
+    DEPTH = 1
+    # TRIES = 1000
 type
     row = array[0'i8..M-1, int8]
     boardT = array[0'i8..M-1, row]
@@ -267,7 +267,7 @@ method mctsMove(self:Board, player:playerT, tries:int,my_player:playerT):moveT{.
 
     
     playGame(player,node.data.state, my_player, true)
-    echo 1
+    # echo 1
     
     if node.data.state.result()*my_player > 0:
         node.data.wins[my_player] = 1
@@ -278,8 +278,8 @@ method mctsMove(self:Board, player:playerT, tries:int,my_player:playerT):moveT{.
         node.data.wins[0] = 1
         node.data.wins[-my_player] = 1
     
-    echo node.data.state.result()
-    echo self.result()
+    # echo node.data.state.result()
+    # echo self.result()
 
 
     return move
@@ -292,9 +292,10 @@ proc playGame(gplayer:playerT, B:Board, my_player:playerT, random:bool)=
         if player!=my_player or random:
             m = B.random_move(player)
         else:
-            m = B.mctsMove(player,TRIES, my_player)
-            # m = B.alphabetamove(player,DEPTH, my_player)
-            break
+            # m = B.mctsMove(player,TRIES, my_player)
+            m = B.alphabetamove(player,DEPTH, my_player)
+            # break
+        # echo m
         B.do_move(m, player)
         player = -player
         if B.terminal():
@@ -306,26 +307,62 @@ proc playGame(gplayer:playerT, B:Board, my_player:playerT, random:bool)=
 
 
 var 
-    defs:float = 0
-    tries = 1
-    start_time = cpuTime()
-    my_player = 1'i8
-    player = -1'i8
+    # defs:float = 0
+    # tries = TRIES
+    # start_time = cpuTime()
+    my_player = 0'i8
+    # player = -1'i8
     B = Board()
 
-for i in 1..tries+1:
-    # echo "1"
-    B = Board()
-    B.init()
-    playGame(player, B, my_player, false)
-    var r = B.result()
-    # echo r
-    if r < 0:
-        defs += 1
-    if (i %% 50) == 0:
-        echo "$1: Result $2 (przegranych: $3)" % [$i,$r,$defs]
-        let time = cpuTime() - start_time
-        echo "--- $1 seconds ---" % [$time]
+B.init()
 
-echo 100.0 - 100.0*defs/(float)tries , "% wygranych"
+# for i in 1..TRIES+1:
+#     # echo "1"
+#     B = Board()
+#     B.init()
+#     playGame(player, B, my_player, false)
+#     var r = B.result()
+#     # echo r
+#     if r*my_player < 0:
+#         defs += 1
+#     if (i %% 5) == 0:
+#         echo "$1: Result $2 (przegranych: $3)" % [$i,$r,$defs]
+#         let time = cpuTime() - start_time
+#         echo "--- $1 seconds ---" % [$time]
+
+# echo 100.0 - 100.0*defs/(float)tries , "% wygranych"
+
+echo "RDY"
+while true:
+    let line = readLine(stdin).split()
+    let cmd = line[0]
+    var m:moveT
+    if cmd == "HEDID":
+        if my_player == 0'i8:
+            my_player = 1
+        var move = ((int8) parseInt(line[3]), (int8)parseInt(line[4]))
+        if not (move == (-1'i8,-1'i8)):
+            B.do_move(move,-my_player)
+
+        m = B.alphabetamove(my_player,DEPTH, my_player)
+        B.do_move(m, my_player)
+        echo "IDO", m[0], m[1]
+        
+    elif cmd == "UGO":
+        if my_player == 0'i8:
+            my_player = -1
+
+        m = B.alphabetamove(my_player,DEPTH, my_player)
+        B.do_move(m, my_player)
+        echo "IDO", m[0], m[1]
+    elif cmd == "ONEMORE":
+        B=Board()
+        my_player = 0'i8
+        B.init()
+        # games+=1
+        # sys.stderr.write(str(games)+"\n")
     
+        echo "RDY"
+    elif cmd == "BYE":
+        break
+    # B.draw()

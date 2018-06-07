@@ -6,4 +6,4 @@ export DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 # Uwaga na:
 # 1. polecenie exec - zastepujepy pythonem basha
 # 2. opcje -u - wylaczamy buforowanie we/wy - pomoze nam przy zapomnianych stdout.flush
-exec /usr/bin/pypy -u $DIR/reversi_val.py
+exec $DIR/reversi
