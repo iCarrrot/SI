@@ -6,4 +6,6 @@ export DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 # Uwaga na:
 # 1. polecenie exec - zastepujepy pythonem basha
 # 2. opcje -u - wylaczamy buforowanie we/wy - pomoze nam przy zapomnianych stdout.flush
-exec /usr/bin/python2 -u $DIR/read.py $DIR && $DIR/z1i2 && /usr/bin/python2 -u $DIR/write.py
+
+echo "Ten program działa w wersji z plikami. Nie było czasu na zmianę."
+exec $DIR/z1i2 
