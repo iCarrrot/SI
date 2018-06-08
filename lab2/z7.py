@@ -169,6 +169,19 @@ def solver():
     file = open("zad_output.txt", "w")
     file.write(final)
     file.close()
+    file = open("result.txt", "r")
+    lines = file.readlines()
+    file.close()
+    
+    file = open("result.txt", "w")
+    
+    # print lines
+    lines+=[final]
+    newlines = "\n".join(lines)
+    # print newlines
+    file.write(newlines)
+    file.close()
+    
 
 
 # board = []
